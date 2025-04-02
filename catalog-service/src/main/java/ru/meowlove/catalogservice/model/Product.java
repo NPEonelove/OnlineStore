@@ -26,13 +26,16 @@ public class Product {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "photo")
+    private String photo;
+
     @Column(name = "price")
     private Double price;
 
     @Column(name = "count")
     private Integer count;
 
-    @Column(name = "rating", nullable = false, columnDefinition = "numeric(1, 2) default 0")
+    @Column(name = "rating")
     private Double rating;
 
     @ManyToMany
@@ -43,8 +46,6 @@ public class Product {
     )
     private List<Category> categories;
 
-    @Column(name = "photo")
-    private String photo;
-//    @OneToMany
+
 
 }

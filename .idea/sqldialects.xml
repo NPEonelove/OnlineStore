@@ -3,6 +3,8 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/catalog-service/src/main/resources/db/changelog/versions/0.0.2-fix-tables.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/catalog-service/src/main/resources/db/changelog/versions/0.0.6-fix-mistakes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/catalog-service/src/main/resources/db/changelog/versions/0.0.7-add-photos-db.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/catalog-service/src/main/resources/db/changelog/versions/0.0.8-drop-photo_db.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>
 </project>
