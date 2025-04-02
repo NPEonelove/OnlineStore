@@ -1,7 +1,13 @@
 package ru.meowlove.catalogservice.dto.product;
 
+import lombok.Getter;
+import lombok.Setter;
+import ru.meowlove.catalogservice.dto.category.GetCategory;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class GetProduct {
     String name;
     String description;
@@ -9,5 +15,5 @@ public class GetProduct {
     String photo;
     Integer count;
     Double rating;
-    List<GetProduct> products;
+    List<GetCategory> categories;
 }

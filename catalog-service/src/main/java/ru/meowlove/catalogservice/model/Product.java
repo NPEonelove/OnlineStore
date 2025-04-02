@@ -43,6 +43,8 @@ public class Product {
     )
     private List<Category> categories;
 
+    @Column(name = "photo")
+    private String photo;
 //    @OneToMany
 
 }

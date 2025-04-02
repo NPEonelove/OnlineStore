@@ -4,4 +4,4 @@ create table if not exists productPhotos (
     id bigint primary key default nextval('productPhotos_seq'),
     product_id bigint references products(id) on delete cascade not null ,
     url text not null
-)
+);

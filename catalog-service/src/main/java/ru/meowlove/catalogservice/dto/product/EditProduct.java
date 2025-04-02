@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class AddProduct {
+public class EditProduct {
     private String name;
     private String description;
     private Double price;
