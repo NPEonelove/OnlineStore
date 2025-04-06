@@ -26,7 +26,7 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "photo")
+    @Column(name = "photo_link")
     private String photo;
 
     @Column(name = "price")

@@ -1,9 +1,13 @@
 package ru.meowlove.catalogservice.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
 import ru.meowlove.catalogservice.dto.product.GetProduct;
@@ -15,9 +19,13 @@ import ru.meowlove.catalogservice.service.ProductService;
 public class ProductController {
     private final ProductService productService;
 
+    @SneakyThrows
     @PostMapping
-    public AddProduct addProduct(@RequestBody AddProduct addProduct) {
-        return productService.addProduct(addProduct);
+    public AddProduct addProduct(@RequestPart("file") MultipartFile file,
+                                 @RequestPart("meta") String addProduct) {
+        ObjectMapper mapper = new ObjectMapper();
+        AddProduct product = mapper.readValue(addProduct, AddProduct.class);
+        return productService.addProduct(file, product);
     }
 
     @GetMapping("/{id}")

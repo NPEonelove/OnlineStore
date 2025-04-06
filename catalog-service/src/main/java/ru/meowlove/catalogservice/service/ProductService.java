@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import ru.meowlove.catalogservice.client.MediaClient;
 import ru.meowlove.catalogservice.dto.category.GetCategory;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
@@ -13,6 +15,7 @@ import ru.meowlove.catalogservice.model.Product;
 import ru.meowlove.catalogservice.repository.CategoryRepository;
 import ru.meowlove.catalogservice.repository.ProductRepository;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,22 +26,31 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final MediaClient mediaClient;
 
     @Transactional
-    public AddProduct addProduct(AddProduct addProduct) {
+    public AddProduct addProduct(MultipartFile file, AddProduct addProduct) {
         Product product = new Product();
         product.setName(addProduct.getName());
         product.setDescription(addProduct.getDescription());
         product.setPrice(addProduct.getPrice());
-        product.setPhoto(addProduct.getPhoto());
+
+        String linkPhoto = mediaClient.uploadMedia("catalog", file);
+        product.setPhoto(linkPhoto);
         product.setCount(addProduct.getCount());
+
+
+
         List<GetCategory> categories = addProduct.getCategories();
-        List<Category> categoryList = new ArrayList<>();
-        for (GetCategory getCategory : categories) {
-            categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
+        if (categories != null && categories.size() > 0) {
+            List<Category> categoryList = new ArrayList<>();
+            for (GetCategory getCategory : categories) {
+                categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
+            }
+
+            product.setCategories(categoryList);
         }
 
-        product.setCategories(categoryList);
         productRepository.save(product);
         return addProduct;
     }
