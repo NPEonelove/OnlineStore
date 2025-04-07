@@ -9,8 +9,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.IOException;
-import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,11 +34,18 @@ public class MediaService {
                 RequestBody.fromInputStream(file.getInputStream(), file.getSize())
         );
 
-        s3Client.close();
 
         return "https://storage.yandexcloud.net/" + bucket + "/" + key;
-
     }
+
+    public void deleteFile(String keyName) {
+        List<String> splits = Arrays.asList(keyName.split("/"));
+        keyName = splits.get(4) + "/" + splits.get(5);
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(keyName).build();
+        s3Client.deleteObject(deleteObjectRequest);
+    }
+
+//    public String updateFile(String directory, MultipartFile file) {}
 
     public static void cleanUp(S3Client s3Client, String bucketName, String keyName) {
         System.out.println("Cleaning up...");

@@ -1,10 +1,12 @@
 package ru.meowlove.catalogservice.dto.product;
 
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.web.multipart.MultipartFile;
 import ru.meowlove.catalogservice.dto.category.GetCategory;
 

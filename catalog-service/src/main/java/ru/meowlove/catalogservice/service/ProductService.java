@@ -1,6 +1,7 @@
 package ru.meowlove.catalogservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,12 +11,13 @@ import ru.meowlove.catalogservice.dto.category.GetCategory;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
 import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.exception.product.ProductAlreadyExistsException;
+import ru.meowlove.catalogservice.exception.product.ProductNotExistsException;
 import ru.meowlove.catalogservice.model.Category;
 import ru.meowlove.catalogservice.model.Product;
 import ru.meowlove.catalogservice.repository.CategoryRepository;
 import ru.meowlove.catalogservice.repository.ProductRepository;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,21 +30,43 @@ public class ProductService {
     private final ModelMapper modelMapper;
     private final MediaClient mediaClient;
 
+    @SneakyThrows
     @Transactional
-    public AddProduct addProduct(MultipartFile file, AddProduct addProduct) {
+    public void addProduct(MultipartFile file, AddProduct addProduct) {
+
+        if (!productRepository.findByName(addProduct.getName()).isEmpty()) {
+            throw new ProductAlreadyExistsException("Product already exists");
+        }
+
+        Product product = mapAddProduct(addProduct);
+
+        String linkPhoto = mediaClient.uploadMedia("catalog", file);
+        product.setPhoto(linkPhoto);
+
+        productRepository.save(product);
+    }
+
+    @SneakyThrows
+    @Transactional
+    public void addProduct(AddProduct addProduct) {
+        if (!productRepository.findByName(addProduct.getName()).isEmpty()) {
+            throw new ProductAlreadyExistsException("Product already exists");
+        }
+
+        productRepository.save(mapAddProduct(addProduct));
+    }
+
+    @SneakyThrows
+    private Product mapAddProduct(AddProduct addProduct) {
+
         Product product = new Product();
         product.setName(addProduct.getName());
         product.setDescription(addProduct.getDescription());
         product.setPrice(addProduct.getPrice());
-
-        String linkPhoto = mediaClient.uploadMedia("catalog", file);
-        product.setPhoto(linkPhoto);
         product.setCount(addProduct.getCount());
 
-
-
         List<GetCategory> categories = addProduct.getCategories();
-        if (categories != null && categories.size() > 0) {
+        if (categories != null && !categories.isEmpty()) {
             List<Category> categoryList = new ArrayList<>();
             for (GetCategory getCategory : categories) {
                 categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
@@ -51,8 +75,7 @@ public class ProductService {
             product.setCategories(categoryList);
         }
 
-        productRepository.save(product);
-        return addProduct;
+        return product;
     }
 
     public GetProduct getProduct(Long id) {
@@ -60,31 +83,55 @@ public class ProductService {
         return modelMapper.map(product, GetProduct.class);
     }
 
-    @Transactional
-    public EditProduct editProduct(Long id, EditProduct editProduct) {
+    private Product mapEditProduct(Long id, EditProduct updateProduct) {
         Product product = productRepository.findById(id).orElseThrow();
-        product.setName(editProduct.getName());
-        product.setDescription(editProduct.getDescription());
-        product.setPrice(editProduct.getPrice());
-        product.setPhoto(editProduct.getPhoto());
-        product.setCount(editProduct.getCount());
-        List<GetCategory> categories = editProduct.getCategories();
+        product.setName(updateProduct.getName());
+        product.setDescription(updateProduct.getDescription());
+        product.setPrice(updateProduct.getPrice());
+        product.setCount(updateProduct.getCount());
+        List<GetCategory> categories = updateProduct.getCategories();
         List<Category> categoryList = new ArrayList<>();
         for (GetCategory getCategory : categories) {
             categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
         }
-
         product.setCategories(categoryList);
-//        product.setCategories(editProduct.getCategories().stream().map(category ->
-//                modelMapper.map(category, Category.class)).collect(Collectors.toList()));
-        return modelMapper.map(productRepository.save(product), EditProduct.class);
+
+        return product;
+    }
+
+    @SneakyThrows
+    @Transactional
+    public void editProduct(Long id, EditProduct updateProduct) {
+
+        Product product = mapEditProduct(id, updateProduct);
+
+        product.setPhoto(updateProduct.getPhoto());
+        productRepository.save(product);
+    }
+
+    @SneakyThrows
+    @Transactional
+    public void editProduct(Long id, MultipartFile file, EditProduct updateProduct) {
+
+        Product product = mapEditProduct(id, updateProduct);
+
+        if (product.getPhoto() != null) {
+            mediaClient.deleteMedia(product.getPhoto());
+        }
+        String photo = mediaClient.uploadMedia("catalog", file);
+        product.setPhoto(photo);
+
+        productRepository.save(product);
     }
 
     @Transactional
     public void deleteProduct(Long id) {
         if (productRepository.existsById(id)) {
+            Product product = productRepository.findById(id).orElseThrow();
+            mediaClient.deleteMedia(product.getPhoto());
             productRepository.deleteById(id);
+        } else {
+            throw new ProductNotExistsException("Product not exists");
         }
-        // TODO: throw
     }
 }
