@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AddCategory {
+public class EditCategory {
 
     @NotNull(message = "Введите название")
     @Size(max = 255, message = "Длина названия максимум 255 символов")

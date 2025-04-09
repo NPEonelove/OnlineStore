@@ -79,22 +79,26 @@ public class ProductService {
     }
 
     public GetProduct getProduct(Long id) {
-        Product product = productRepository.findById(id).orElseThrow();
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotExistsException("Product does not exist"));
         return modelMapper.map(product, GetProduct.class);
     }
 
     private Product mapEditProduct(Long id, EditProduct updateProduct) {
-        Product product = productRepository.findById(id).orElseThrow();
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotExistsException("Product does not exist"));
         product.setName(updateProduct.getName());
         product.setDescription(updateProduct.getDescription());
         product.setPrice(updateProduct.getPrice());
         product.setCount(updateProduct.getCount());
         List<GetCategory> categories = updateProduct.getCategories();
-        List<Category> categoryList = new ArrayList<>();
-        for (GetCategory getCategory : categories) {
-            categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
+        if (categories != null && !categories.isEmpty()) {
+            List<Category> categoryList = new ArrayList<>();
+
+            for (GetCategory getCategory : categories) {
+                categoryList.add(categoryRepository.findByName(modelMapper.map(getCategory, Category.class).getName()));
+            }
+
+            product.setCategories(categoryList);
         }
-        product.setCategories(categoryList);
 
         return product;
     }
@@ -126,12 +130,8 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(Long id) {
-        if (productRepository.existsById(id)) {
-            Product product = productRepository.findById(id).orElseThrow();
-            mediaClient.deleteMedia(product.getPhoto());
-            productRepository.deleteById(id);
-        } else {
-            throw new ProductNotExistsException("Product not exists");
-        }
+        Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotExistsException("Product does not exist"));
+        mediaClient.deleteMedia(product.getPhoto());
+        productRepository.deleteById(id);
     }
 }

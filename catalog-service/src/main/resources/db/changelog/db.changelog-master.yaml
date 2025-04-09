@@ -19,3 +19,5 @@ databaseChangeLog:
       file: /db/changelog/versions/0.0.9-add-constraint_rating.sql
   - include:
       file: /db/changelog/versions/0.1.0-forAdd-s3.sql
+  - include:
+      file: /db/changelog/versions/0.1.1-clear-data.sql

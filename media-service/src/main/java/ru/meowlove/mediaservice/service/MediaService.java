@@ -23,7 +23,7 @@ public class MediaService {
 
     @SneakyThrows
     public String uploadFile(String directory, MultipartFile file) {
-        String key = directory + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
+        String key = directory + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename() + "-" + System.currentTimeMillis();
 
         s3Client.putObject(
                 PutObjectRequest.builder()
@@ -45,25 +45,4 @@ public class MediaService {
         s3Client.deleteObject(deleteObjectRequest);
     }
 
-//    public String updateFile(String directory, MultipartFile file) {}
-
-    public static void cleanUp(S3Client s3Client, String bucketName, String keyName) {
-        System.out.println("Cleaning up...");
-        try {
-            System.out.println("Deleting object: " + keyName);
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucketName).key(keyName).build();
-            s3Client.deleteObject(deleteObjectRequest);
-            System.out.println(keyName + " has been deleted.");
-            System.out.println("Deleting bucket: " + bucketName);
-            DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(bucketName).build();
-            s3Client.deleteBucket(deleteBucketRequest);
-            System.out.println(bucketName + " has been deleted.");
-            System.out.printf("%n");
-        } catch (S3Exception e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-        }
-        System.out.println("Cleanup complete");
-        System.out.printf("%n");
-    }
 }

@@ -13,6 +13,7 @@ import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
 import ru.meowlove.catalogservice.dto.product.GetProduct;
 import ru.meowlove.catalogservice.exception.product.ProductNotCreatedException;
+import ru.meowlove.catalogservice.exception.product.ProductNotEditedException;
 import ru.meowlove.catalogservice.service.ProductService;
 
 @RestController
@@ -49,8 +50,17 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<HttpStatus> updateProduct(@RequestParam(value = "file", required = false) MultipartFile file,
-                                                    @ModelAttribute EditProduct editProduct, @PathVariable Long id) {
+    public ResponseEntity<HttpStatus> updateProduct(@PathVariable Long id, @RequestParam(value = "file", required = false) MultipartFile file,
+                                                    @ModelAttribute @Valid EditProduct editProduct, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            for (ObjectError error : bindingResult.getAllErrors()) {
+                errorMsg.append(error.getDefaultMessage()).append(". ");
+            }
+            throw new ProductNotEditedException(errorMsg.toString());
+        }
+
         if (file == null) {
             productService.editProduct(id, editProduct);
         } else {

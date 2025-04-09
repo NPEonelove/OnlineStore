@@ -1,7 +1,7 @@
 package ru.meowlove.catalogservice.dto.product;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,21 +12,21 @@ import java.util.List;
 @Getter
 @Setter
 public class EditProduct {
-    @NotNull
-    @Size(min = 1, max = 255)
+    @NotNull(message = "Введите название")
+    @Size(min = 1, max = 255, message = "Длина названия от 1 до 255 символов")
     private String name;
 
-    @Size(min = 1, max = 2000)
+    @Size(max = 2000, message = "Длина описания до 2000 символов")
     private String description;
 
-    @NotNull
-    @Min(0)
+    @NotNull(message = "Введите цену")
+    @Positive(message = "Цена должна быть числом больше 0")
     private Double price;
 
     private String photo;
 
-    @NotNull
-    @Min(0)
+    @NotNull(message = "Введите количество")
+    @Positive(message = "Количество должно быть числом больше 0")
     private Integer count;
 
     private List<GetCategory> categories;
