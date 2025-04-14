@@ -11,6 +11,7 @@ import ru.meowlove.catalogservice.dto.category.GetCategory;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
 import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.exception.category.CategoryNotExistsException;
 import ru.meowlove.catalogservice.exception.product.ProductAlreadyExistsException;
 import ru.meowlove.catalogservice.exception.product.ProductNotExistsException;
 import ru.meowlove.catalogservice.model.Category;
@@ -19,6 +20,7 @@ import ru.meowlove.catalogservice.repository.CategoryRepository;
 import ru.meowlove.catalogservice.repository.ProductRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -34,13 +36,14 @@ public class ProductService {
     @Transactional
     public void addProduct(MultipartFile file, AddProduct addProduct) {
 
-        if (!productRepository.findByName(addProduct.getName()).isEmpty()) {
+        if (productRepository.findByName(addProduct.getName()) != null) {
             throw new ProductAlreadyExistsException("Product already exists");
         }
 
         Product product = mapAddProduct(addProduct);
 
-        String linkPhoto = mediaClient.uploadMedia("catalog", file);
+        String linkPhoto = mediaClient.uploadMedia("catalog", Collections.singletonList(file)
+                .toArray(new MultipartFile[0])).getFirst();
         product.setPhoto(linkPhoto);
 
         productRepository.save(product);
@@ -49,7 +52,7 @@ public class ProductService {
     @SneakyThrows
     @Transactional
     public void addProduct(AddProduct addProduct) {
-        if (!productRepository.findByName(addProduct.getName()).isEmpty()) {
+        if (productRepository.findByName(addProduct.getName()) != null) {
             throw new ProductAlreadyExistsException("Product already exists");
         }
 
@@ -103,13 +106,30 @@ public class ProductService {
         return product;
     }
 
+    private void checkProductNameUnique(Long id, String name) {
+        if (productRepository.findById(id).isEmpty()) {
+            throw new CategoryNotExistsException("Product with this id does not exist");
+        }
+
+        Product product = productRepository.findByName(name);
+
+        if (product != null) {
+            if (!product.getId().equals(id)) {
+                throw new CategoryNotExistsException("Product with this name already exist");
+            }
+        }
+    }
+
     @SneakyThrows
     @Transactional
     public void editProduct(Long id, EditProduct updateProduct) {
 
+        checkProductNameUnique(id, updateProduct.getName());
+
         Product product = mapEditProduct(id, updateProduct);
 
         product.setPhoto(updateProduct.getPhoto());
+
         productRepository.save(product);
     }
 
@@ -117,12 +137,15 @@ public class ProductService {
     @Transactional
     public void editProduct(Long id, MultipartFile file, EditProduct updateProduct) {
 
+        checkProductNameUnique(id, updateProduct.getName());
+
         Product product = mapEditProduct(id, updateProduct);
 
         if (product.getPhoto() != null) {
-            mediaClient.deleteMedia(product.getPhoto());
+            mediaClient.deleteMedia(Collections.singletonList(product.getPhoto()).toArray(new String[0]));
         }
-        String photo = mediaClient.uploadMedia("catalog", file);
+        String photo = mediaClient.uploadMedia("catalog", Collections.singletonList(file)
+                .toArray(new MultipartFile[0])).getFirst();
         product.setPhoto(photo);
 
         productRepository.save(product);
@@ -131,7 +154,7 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotExistsException("Product does not exist"));
-        mediaClient.deleteMedia(product.getPhoto());
+        mediaClient.deleteMedia(Collections.singletonList(product.getPhoto()).toArray(new String[0]));
         productRepository.deleteById(id);
     }
 }

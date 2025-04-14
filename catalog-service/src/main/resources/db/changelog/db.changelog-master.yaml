@@ -21,3 +21,5 @@ databaseChangeLog:
       file: /db/changelog/versions/0.1.0-forAdd-s3.sql
   - include:
       file: /db/changelog/versions/0.1.1-clear-data.sql
+  - include:
+      file: /db/changelog/versions/0.1.2-add-productphotos_db.sql

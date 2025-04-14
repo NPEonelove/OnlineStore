@@ -10,6 +10,7 @@ import ru.meowlove.catalogservice.dto.category.GetCategory;
 import ru.meowlove.catalogservice.dto.product.GetProduct;
 import ru.meowlove.catalogservice.exception.category.CategoryAlreadyExistsException;
 import ru.meowlove.catalogservice.exception.category.CategoryNotExistsException;
+import ru.meowlove.catalogservice.exception.product.ProductNotExistsException;
 import ru.meowlove.catalogservice.model.Category;
 import ru.meowlove.catalogservice.model.Product;
 import ru.meowlove.catalogservice.repository.CategoryRepository;
@@ -52,8 +53,25 @@ public class CategoryService {
         return addCategory;
     }
 
+    private void checkCategoryNameUnique(Long id, String name) {
+        if (categoryRepository.findById(id).isEmpty()) {
+            throw new ProductNotExistsException("Product with this id does not exist");
+        }
+
+        Category category = categoryRepository.findByName(name);
+
+        if (category != null) {
+            if (!category.getId().equals(id)) {
+                throw new ProductNotExistsException("Product with this name already exist");
+            }
+        }
+    }
+
     @Transactional
     public EditCategory editCategory(Long id, EditCategory editCategory) {
+
+        checkCategoryNameUnique(id, editCategory.getName());
+
         Category category = categoryRepository.findById(id).orElseThrow(() -> new CategoryNotExistsException("Category does not exist"));
         category.setName(editCategory.getName());
         categoryRepository.save(category);

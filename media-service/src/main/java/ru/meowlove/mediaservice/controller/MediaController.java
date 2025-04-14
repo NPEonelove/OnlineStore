@@ -6,8 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.meowlove.mediaservice.dto.DeleteMedia;
 import ru.meowlove.mediaservice.service.MediaService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,13 +18,14 @@ public class MediaController {
 
     @SneakyThrows
     @PostMapping
-    public ResponseEntity<String> uploadMedia(@RequestPart("directory") String directory, @RequestPart("file") MultipartFile file) {
-        return ResponseEntity.ok(mediaService.uploadFile(directory, file));
+    public ResponseEntity<List<String>> uploadMedia(@RequestPart("directory") String directory,
+                                                    @RequestPart("file") MultipartFile[] files) {
+        return ResponseEntity.ok(mediaService.uploadFiles(directory, files));
     }
 
     @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteMedia(@RequestParam("key") String key) {
-        mediaService.deleteFile(key);
+    public ResponseEntity<HttpStatus> deleteMedia(@RequestParam("keys") String[] keys) {
+        mediaService.deleteFiles(keys);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 }

@@ -46,6 +46,7 @@ public class Product {
     )
     private List<Category> categories;
 
-
+    @OneToMany(mappedBy = "product")
+    private List<Photo> photos;
 
 }

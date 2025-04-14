@@ -9,6 +9,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -22,27 +23,36 @@ public class MediaService {
     private String bucket;
 
     @SneakyThrows
-    public String uploadFile(String directory, MultipartFile file) {
-        String key = directory + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename() + "-" + System.currentTimeMillis();
+    public List<String> uploadFiles(String directory, MultipartFile[] files) {
 
-        s3Client.putObject(
-                PutObjectRequest.builder()
-                        .bucket(bucket)
-                        .key(key)
-                        .acl(ObjectCannedACL.PUBLIC_READ)
-                        .build(),
-                RequestBody.fromInputStream(file.getInputStream(), file.getSize())
-        );
+        List<String> fileLinks = new ArrayList<>();
 
+        for (MultipartFile file : files) {
+            String key = directory + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename() + "-" + System.currentTimeMillis();
 
-        return "https://storage.yandexcloud.net/" + bucket + "/" + key;
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .acl(ObjectCannedACL.PUBLIC_READ)
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+            );
+
+            fileLinks.add("https://storage.yandexcloud.net/" + bucket + "/" + key);
+        }
+
+        return fileLinks;
     }
 
-    public void deleteFile(String keyName) {
-        List<String> splits = Arrays.asList(keyName.split("/"));
-        keyName = splits.get(4) + "/" + splits.get(5);
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(keyName).build();
-        s3Client.deleteObject(deleteObjectRequest);
+    public void deleteFiles(String[] keyNames) {
+
+        for (String keyName : keyNames) {
+            List<String> splits = Arrays.asList(keyName.split("/"));
+            keyName = splits.get(4) + "/" + splits.get(5);
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(keyName).build();
+            s3Client.deleteObject(deleteObjectRequest);
+        }
     }
 
 }
