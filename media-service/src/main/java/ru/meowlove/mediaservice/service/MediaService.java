@@ -28,7 +28,7 @@ public class MediaService {
         List<String> fileLinks = new ArrayList<>();
 
         for (MultipartFile file : files) {
-            String key = directory + "/" + UUID.randomUUID() + "-" + file.getOriginalFilename() + "-" + System.currentTimeMillis();
+            String key = directory + "/" + UUID.randomUUID() + "-" + System.currentTimeMillis() + "-" + file.getOriginalFilename();
 
             s3Client.putObject(
                     PutObjectRequest.builder()
@@ -49,7 +49,12 @@ public class MediaService {
 
         for (String keyName : keyNames) {
             List<String> splits = Arrays.asList(keyName.split("/"));
-            keyName = splits.get(4) + "/" + splits.get(5);
+            List<String> keys = splits.subList(4, splits.size());
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String key : keys) {
+                stringBuilder.append(key).append("/");
+            }
+            keyName = stringBuilder.substring(0, stringBuilder.toString().length() - 1);
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(keyName).build();
             s3Client.deleteObject(deleteObjectRequest);
         }

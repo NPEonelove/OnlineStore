@@ -11,16 +11,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
-import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.dto.product.GetCardProduct;
+import ru.meowlove.catalogservice.dto.product.GetFullProduct;
 import ru.meowlove.catalogservice.exception.product.ProductNotCreatedException;
 import ru.meowlove.catalogservice.exception.product.ProductNotEditedException;
+import ru.meowlove.catalogservice.model.Product;
 import ru.meowlove.catalogservice.service.ProductService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/product")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+
+    @GetMapping
+    public ResponseEntity<List<GetCardProduct>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
 
     @SneakyThrows
     @PostMapping
@@ -45,7 +54,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetProduct> getProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<GetFullProduct> getProduct(@PathVariable("id") Long id) {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 

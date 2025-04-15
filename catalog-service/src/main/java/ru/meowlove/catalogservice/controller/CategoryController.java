@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.meowlove.catalogservice.dto.category.AddCategory;
 import ru.meowlove.catalogservice.dto.category.EditCategory;
 import ru.meowlove.catalogservice.dto.category.GetCategory;
-import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.dto.product.GetCardProduct;
+import ru.meowlove.catalogservice.dto.product.GetFullProduct;
 import ru.meowlove.catalogservice.exception.category.CategoryNotCreatedException;
 import ru.meowlove.catalogservice.exception.category.CategoryNotEditedException;
 import ru.meowlove.catalogservice.service.CategoryService;
@@ -29,7 +30,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetProduct>> getProductsByCategory(@RequestBody GetCategory getCategory) {
+    public ResponseEntity<List<GetCardProduct>> getProductsByCategory(@RequestBody GetCategory getCategory) {
         return ResponseEntity.ok(categoryService.findByName(getCategory.getName()));
     }
 

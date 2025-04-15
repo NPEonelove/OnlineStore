@@ -18,5 +18,5 @@ public interface MediaClient {
     List<String> uploadMedia(@RequestPart("directory") String directory, @RequestPart("file") MultipartFile[] files);
 
     @DeleteMapping(value = "/media")
-    String deleteMedia(@RequestParam("keys") String[] key);
+    String deleteMedia(@RequestParam("keys") String[] keys);
 }

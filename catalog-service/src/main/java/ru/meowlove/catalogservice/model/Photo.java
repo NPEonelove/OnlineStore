@@ -1,9 +1,13 @@
 package ru.meowlove.catalogservice.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@Data
 @Entity
 @Table(name = "photos")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Photo {
 
     @Id
@@ -12,7 +16,7 @@ public class Photo {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "photoLink")
+    @Column(name = "photolink")
     private String photoLink;
 
     @ManyToOne

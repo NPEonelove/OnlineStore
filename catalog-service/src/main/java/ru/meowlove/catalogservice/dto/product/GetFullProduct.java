@@ -8,7 +8,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class GetProduct {
+public class GetFullProduct {
+    private Long id;
+
     private String name;
 
     private String description;

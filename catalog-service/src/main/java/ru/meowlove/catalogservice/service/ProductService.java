@@ -10,7 +10,8 @@ import ru.meowlove.catalogservice.client.MediaClient;
 import ru.meowlove.catalogservice.dto.category.GetCategory;
 import ru.meowlove.catalogservice.dto.product.AddProduct;
 import ru.meowlove.catalogservice.dto.product.EditProduct;
-import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.dto.product.GetCardProduct;
+import ru.meowlove.catalogservice.dto.product.GetFullProduct;
 import ru.meowlove.catalogservice.exception.category.CategoryNotExistsException;
 import ru.meowlove.catalogservice.exception.product.ProductAlreadyExistsException;
 import ru.meowlove.catalogservice.exception.product.ProductNotExistsException;
@@ -22,6 +23,7 @@ import ru.meowlove.catalogservice.repository.ProductRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +33,17 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
     private final MediaClient mediaClient;
+
+    public List<GetCardProduct> getAllProducts() {
+//        List<GetCardProduct> products = new ArrayList<>();
+//        List<Product> productList = productRepository.findAll();
+//        for (Product product : productList) {
+//            GetCardProduct getCardProduct = new GetCardProduct();
+//            getCardProduct
+//        }
+        return productRepository.findAll().stream().map(product ->
+                modelMapper.map(product, GetCardProduct.class)).collect(Collectors.toList());
+    }
 
     @SneakyThrows
     @Transactional
@@ -42,7 +55,7 @@ public class ProductService {
 
         Product product = mapAddProduct(addProduct);
 
-        String linkPhoto = mediaClient.uploadMedia("catalog", Collections.singletonList(file)
+        String linkPhoto = mediaClient.uploadMedia("catalog/productCard", Collections.singletonList(file)
                 .toArray(new MultipartFile[0])).getFirst();
         product.setPhoto(linkPhoto);
 
@@ -81,9 +94,9 @@ public class ProductService {
         return product;
     }
 
-    public GetProduct getProduct(Long id) {
+    public GetFullProduct getProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new ProductNotExistsException("Product does not exist"));
-        return modelMapper.map(product, GetProduct.class);
+        return modelMapper.map(product, GetFullProduct.class);
     }
 
     private Product mapEditProduct(Long id, EditProduct updateProduct) {
@@ -144,7 +157,7 @@ public class ProductService {
         if (product.getPhoto() != null) {
             mediaClient.deleteMedia(Collections.singletonList(product.getPhoto()).toArray(new String[0]));
         }
-        String photo = mediaClient.uploadMedia("catalog", Collections.singletonList(file)
+        String photo = mediaClient.uploadMedia("catalog/productCard", Collections.singletonList(file)
                 .toArray(new MultipartFile[0])).getFirst();
         product.setPhoto(photo);
 

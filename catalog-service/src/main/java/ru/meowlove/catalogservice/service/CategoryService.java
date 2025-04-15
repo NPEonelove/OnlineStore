@@ -7,7 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.meowlove.catalogservice.dto.category.AddCategory;
 import ru.meowlove.catalogservice.dto.category.EditCategory;
 import ru.meowlove.catalogservice.dto.category.GetCategory;
-import ru.meowlove.catalogservice.dto.product.GetProduct;
+import ru.meowlove.catalogservice.dto.product.GetCardProduct;
+import ru.meowlove.catalogservice.dto.product.GetFullProduct;
 import ru.meowlove.catalogservice.exception.category.CategoryAlreadyExistsException;
 import ru.meowlove.catalogservice.exception.category.CategoryNotExistsException;
 import ru.meowlove.catalogservice.exception.product.ProductNotExistsException;
@@ -32,13 +33,13 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public List<GetProduct> findByName(String name) {
+    public List<GetCardProduct> findByName(String name) {
          Category category = categoryRepository.findByName(name);
          List<Product> products = category.getProducts();
-         List<GetProduct> productList = new ArrayList<>();
+         List<GetCardProduct> productList = new ArrayList<>();
          for (Product product : products) {
-             GetProduct getProduct = modelMapper.map(product, GetProduct.class);
-             productList.add(getProduct);
+             GetCardProduct getCardProduct = modelMapper.map(product, GetCardProduct.class);
+             productList.add(getCardProduct);
          }
          return productList;
     }
